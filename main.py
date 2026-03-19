@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# 데이터 불러오기
+# 데이터 불러오기, 함수지정
 def load_data():
     df = pd.read_csv("data/transactions.csv")
     df["date"] = pd.to_datetime(df["date"])
@@ -9,6 +9,25 @@ def load_data():
     df["balance"] = df["debit"] - df["credit"]
     return df
 df = load_data()
+
+def get_monthly_account(df, month):
+    result = (
+    df[df["month"] == month]
+    .groupby("account")["debit"]
+    .sum()
+    )
+    return result
+
+def plot_monthly_account(monthly_account, month):
+    plt.figure(figsize=(8, 5))
+    monthly_account.plot(kind="bar")
+    plt.title(f"Month {month} Account Debit")
+    plt.xlabel("Account")
+    plt.ylabel("Debit")
+    plt.xticks(rotation=0)
+    plt.tight_layout()
+    plt.savefig(f"result/{month}_debit.png")
+    plt.show()
 
 # 월별 debit 합계
 monthly = df.groupby("month")["debit"].sum()
@@ -26,54 +45,43 @@ pivot = pd.pivot_table(
 )
 
 # account별 debit Top 3자동화
-month_input = int(input("몇 월을 보시겠습니까? : "))
+try:
+    month_input = int(input("몇 월을 보시겠습니까? : "))
 
-def get_monthly_account(df, month):
-    result = (
-        df[df["month"] == month]
-        .groupby("account")["debit"]
-        .sum()
-    )
-    return result
-
-monthly_account = get_monthly_account(df, month_input)
-
-top3 = (monthly_account
+    if month_input < 1 or month_input > 12:
+        print ("1~12 사이의 월을 입력하세요.")
+    else:
+        monthly_account = get_monthly_account(df, month_input)
+        top3 = (monthly_account
             .sort_values(ascending=False)
             .head(3)
-)
+        )
+        
+        #출력
+        print("=== 월별 debit 합계 ===")
+        print(monthly)
+        print()
 
-def plot_monthly_account(monthly_account, month):
-    plt.figure(figsize=(8, 5))
-    monthly_account.plot(kind="bar")
-    plt.title(f"Month {month} Account Debit")
-    plt.xlabel("Account")
-    plt.ylabel("Debit")
-    plt.xticks(rotation=0)
-    plt.tight_layout()
-    plt.savefig(f"result/{month}_debit.png")
-    plt.show()
+        print("=== 계정별 debit 합계 ===")
+        print(account)
+        print()
 
+        print("=== 월별 x 계정별 debit 표 ===")
+        print(pivot)
+        print()
 
-# 출력
-print("=== 월별 debit 합계 ===")
-print(monthly)
-print()
+        if len(monthly_account) == 0:
+            print("데이터 없음")
+        else:
+            top_account = top3.index[0]
+            top_value = top3.iloc[0]
 
-print("=== 계정별 debit 합계 ===")
-print(account)
-print()
+            print("===", month_input,"월 account별 TOP 3 ===")
+            print(top3)
 
-print("=== 월별 x 계정별 debit 표 ===")
-print(pivot)
-print()
+            #그래프
+            plot_monthly_account(monthly_account, month_input)
+            print(f"{month_input}월에는 {top_account} 계정의 debit이 가장 높았습니다({top_value})")
 
-if len(monthly_account) == 0:
-    print("데이터 없음")
-else:
-    # 출력
-    print("===", month_input,"월 account별 TOP 3 ===")
-    print(top3)
-
-    #그래프
-    plot_monthly_account(monthly_account, month_input)
+except ValueError:
+    print("숫자를 입력하세요.")
