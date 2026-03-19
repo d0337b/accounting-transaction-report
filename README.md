@@ -18,14 +18,15 @@
 - 사용자가 입력한 월의 account별 debit 그래프 저장
 
 ## Project Structure
-```
+```text
 accounting-transaction-report/
 ├── main.py
 ├── README.md
 ├── data/
 │   └── transactions.csv
-└── result/
-    └── {month}_debit.png
+├── result/
+│   └── 3_debit.png
+└── .gitignore
 ```
 
 ## How to Run
@@ -34,8 +35,12 @@ accounting-transaction-report/
 
 ```bash
 python3 main.py
+```
 
 ## Result
 
-### Month 3
+### Example Output Graph
+
+아래 그래프는 선택한 달의 Account별 Debit 내역을 보여줍니다.
+
 ![Month 3 Graph](result/3_debit.png)
